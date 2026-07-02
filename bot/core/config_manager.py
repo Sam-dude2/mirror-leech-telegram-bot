@@ -6,18 +6,28 @@ from bot import LOGGER
 
 
 class Config:
+    ALLDEBRID_API_KEY = ""
+    TORBOX_API_KEY = ""
     AS_DOCUMENT = False
     AUTHORIZED_CHATS = ""
     BASE_URL = ""
     BASE_URL_PORT = 80
     BOT_TOKEN = ""
+    BUZZHEAVIER_ACCOUNT_ID = ""
+    BUZZHEAVIER_FOLDER_ID = ""
+    GOFILE_API_KEY = ""
     CMD_SUFFIX = ""
+    CLONE_DUMP_CHATS = ""
     DATABASE_URL = ""
+    DATABASE_NAME = "mltb"
     DEFAULT_UPLOAD = "rc"
     EQUAL_SPLITS = False
     EXCLUDED_EXTENSIONS = ""
+    INCLUDED_EXTENSIONS = ""
     FFMPEG_CMDS = {}
     FILELION_API = ""
+    FILES_LINKS = False
+    GALLERY_DL_OPTIONS = {}
     GDRIVE_ID = ""
     INCOMPLETE_TASK_NOTIFIER = False
     INDEX_URL = ""
@@ -31,7 +41,7 @@ class Config:
     HYBRID_LEECH = False
     HYDRA_IP = ""
     HYDRA_API_KEY = ""
-    NAME_SUBSTITUTE = ""
+    NAME_SUBSTITUTE = r""
     OWNER_ID = 0
     QUEUE_ALL = 0
     QUEUE_DOWNLOAD = 0
@@ -148,13 +158,12 @@ class Config:
         if isinstance(converted_value, str):
             converted_value = converted_value.strip()
 
-        if attr == "DEFAULT_UPLOAD" and converted_value != "gd":
+        if attr == "DEFAULT_UPLOAD" and converted_value not in {"gd", "bh", "gf"}:
             return "rc"
 
         if attr in {
             "BASE_URL",
             "RCLONE_SERVE_URL",
-            "INDEX_URL",
             "SEARCH_API_LINK",
         }:
             return converted_value.strip("/") if converted_value else ""

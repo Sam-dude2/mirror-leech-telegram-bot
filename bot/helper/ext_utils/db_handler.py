@@ -6,7 +6,7 @@ from pymongo.server_api import ServerApi
 from pymongo.errors import PyMongoError
 
 from ... import LOGGER, user_data, rss_dict, qbit_options
-from ...core.mltb_client import TgClient
+from ...core.telegram_manager import TgClient
 from ...core.config_manager import Config
 
 
@@ -21,9 +21,12 @@ class DbManager:
             if self._conn is not None:
                 await self._conn.close()
             self._conn = AsyncMongoClient(
-                Config.DATABASE_URL, server_api=ServerApi("1")
+                Config.DATABASE_URL,
+                server_api=ServerApi("1"),
+                connectTimeoutMS=60000,
+                serverSelectionTimeoutMS=60000,
             )
-            self.db = self._conn.mltb
+            self.db = self._conn[Config.DATABASE_NAME]
             self._return = False
         except PyMongoError as e:
             LOGGER.error(f"Error in DB connection: {e}")
@@ -40,12 +43,15 @@ class DbManager:
     async def update_deploy_config(self):
         if self._return:
             return
-        settings = import_module("config")
-        config_file = {
-            key: value.strip() if isinstance(value, str) else value
-            for key, value in vars(settings).items()
-            if not key.startswith("__")
-        }
+        try:
+            settings = import_module("config")
+            config_file = {
+                key: value.strip() if isinstance(value, str) else value
+                for key, value in vars(settings).items()
+                if not key.startswith("__")
+            }
+        except ModuleNotFoundError:
+            return
         await self.db.settings.deployConfig.replace_one(
             {"_id": TgClient.ID}, config_file, upsert=True
         )
